@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const { Sequelize, DataTypes } = require("sequelize");
-const configData = require("../config/config.js"); // Import config.js
+const configData = require("../config/config.js");
 const process = require("process");
 
 const basename = path.basename(__filename);
@@ -26,12 +26,13 @@ const modelFiles = fs
   .filter((file) => file.endsWith(".js") && file !== basename);
 
 modelFiles.forEach((file) => {
-  const model = require(path.join(__dirname, file)); // Import each model
+  const model = require(path.join(__dirname, file));
   db[model.name] = model(sequelize, DataTypes);
 });
 
 Object.keys(db).forEach((modelName) => {
   if (db[modelName] && db[modelName].associate) {
+    console.log(`Associating model: ${modelName}`);
     db[modelName].associate(db);
   }
 });

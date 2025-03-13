@@ -29,8 +29,8 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Roles", // Ensure it matches exactly as defined in create-roles.js
-          key: "id", // Fixed reference key
+          model: "Roles", // Ensure that this matches the model name in plural form
+          key: "id", // This should be the primary key in Roles
         },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
