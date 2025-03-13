@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   class Roles extends Model {
     static associate(models) {
       // Define the reverse association
-      Roles.hasMany(models.Users, {
+      Roles.belongsToMany(models.Users, {
         foreignKey: "role_id", // Foreign key in Users table
         sourceKey: "id", // Primary key in Roles table
       });

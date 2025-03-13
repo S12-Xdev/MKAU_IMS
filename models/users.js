@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
   class Users extends Model {
     static associate(models) {
       // Correcting the association
-      Users.belongsTo(models.Roles, {
+      Users.hasOne(models.Roles, {
         foreignKey: "role_id", // Foreign key in Users table
         targetKey: "id", // Primary key in Roles table
       });
