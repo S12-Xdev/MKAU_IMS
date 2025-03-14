@@ -6,6 +6,7 @@ const {
   comparePassword,
 } = require("../utils/authUtils");
 const { sendEmail } = require("../utils/emailUtils");
+const { sendSMS } = require("../utils/smsUtils");
 
 const authController = {
   login: async (req, res) => {
@@ -38,7 +39,7 @@ const authController = {
   },
 
   forgotPassword: async (req, res) => {
-    const { email } = req.body;
+    const { email, phone } = req.body;
 
     try {
       const user = await userService.findUserByEmail(email);
@@ -53,6 +54,11 @@ const authController = {
         email,
         "Password Reset",
         `Click this link to reset your password: ${resetLink}`
+      );
+
+      await sendSMS(
+        phone,
+        `MKAU-IMS: Reset your password using this link: ${resetLink}`
       );
 
       res.json({ message: "Password reset link sent to email" });
