@@ -1,6 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const helmet = require("helmet");
+const bodyParser = require("body-parser")
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const syncDatabaseAlter = require("./dbconnect/dbconnect.js");

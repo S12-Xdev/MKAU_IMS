@@ -8,7 +8,7 @@ const userControllers = {
 
   userRegister: async (req, res) => {
     try {
-      const { fname, lname, email, password, role } = req.body;
+      const { first_name, last_name, email, password, role } = req.body;
 
       const userExist = await userService.findUserByEmail(email);
       if (userExist) {
@@ -18,7 +18,7 @@ const userControllers = {
       }
 
       const hashedPassword = await userUtils.hashPassword(password);
-      const newUser = { fname, lname, email, password: hashedPassword, role };
+      const newUser = { first_name, last_name, email, password: hashedPassword, role };
 
       const userCreated = await userService.createUser(newUser);
       if (userCreated) {
@@ -56,10 +56,7 @@ const userControllers = {
       const Data = req.body;
       const userEmail = req.userEmail;
 
-      const userUpdated = await userService.updateUserProfile(
-        userEmail,
-        Data
-      );
+      const userUpdated = await userService.updateUserProfile(userEmail, Data);
       if (!userUpdated) {
         return res.status(500).json({ error: "Profile update failed" });
       }
