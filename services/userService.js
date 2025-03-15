@@ -1,10 +1,10 @@
-const { User, Role } = require("../models");
+const { Users, Roles } = require("../models");
 
 const userService = {
   findUserByEmail: async (email) => {
-    const userFounded = await User.findOne({
+    const userFounded = await Users.findOne({
       where: { email },
-      include: { model: Role, as: "role" }, // Fetch role info
+      include: { model: Roles, as: "role" }, // Fetch role info
     });
     if (!userFounded) {
       return null;
@@ -13,10 +13,10 @@ const userService = {
   },
 
   createUser: async (userData) => {
-    const role = await Role.findOne({ where: { role_name: userData.role } });
+    const role = await Roles.findOne({ where: { role_name: userData.role } });
     if (!role) throw new Error("Role not found");
 
-    const createUser = await User.create({ ...userData, role_id: role.id });
+    const createUser = await Users.create({ ...userData, role_id: role.id });
 
     if (!createUser) {
       return null;
@@ -25,7 +25,7 @@ const userService = {
   },
 
   deleteUserProfile: async (email) => {
-    const deleted = await User.destroy({ where: { email } });
+    const deleted = await Users.destroy({ where: { email } });
     if (!deleted) {
       return null;
     }
@@ -33,7 +33,7 @@ const userService = {
   },
 
   updateUserProfile: async (email, Data) => {
-    const [updated] = await User.update(Data, { where: { email } });
+    const [updated] = await Users.update(Data, { where: { email } });
     if (!updated) {
       return null;
     }
@@ -42,7 +42,7 @@ const userService = {
 
   updateUserPassword: async (email, newPassword) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    const [updated] = await User.update(
+    const [updated] = await Users.update(
       { password: hashedPassword },
       { where: { email } }
     );
