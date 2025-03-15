@@ -1,12 +1,19 @@
 const express = require("express");
 const router = express.Router();
 
+const { authMiddleware, isAdmin } = require("../middlewares/authMiddleware"); // Destructure to import both middlewares
+
 const userControllers = require("../controllers/userControllers");
 
 router.get("/", userControllers.welcomePage);
 router.post("/userRegister", userControllers.userRegister);
-router.get("/profile", userControllers.userProfile);
-router.put("/updateProfile", userControllers.updateProfile);
-router.delete("/deleteProfile", userControllers.deleteProfile);
+router.get("/profile", authMiddleware, userControllers.userProfile); // Apply authMiddleware here
+router.put("/updateProfile", authMiddleware, userControllers.updateProfile); // Apply authMiddleware here
+router.delete(
+  "/deleteProfile",
+  authMiddleware,
+  isAdmin,
+  userControllers.deleteProfile
+); // Apply both middlewares
 
 module.exports = router;

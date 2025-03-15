@@ -18,7 +18,13 @@ const userControllers = {
       }
 
       const hashedPassword = await userUtils.hashPassword(password);
-      const newUser = { first_name, last_name, email, password: hashedPassword, role };
+      const newUser = {
+        first_name,
+        last_name,
+        email,
+        password: hashedPassword,
+        role,
+      };
 
       const userCreated = await userService.createUser(newUser);
       if (userCreated) {
@@ -35,7 +41,7 @@ const userControllers = {
 
   userProfile: async (req, res) => {
     try {
-      const userEmail = req.userEmail;
+      const userEmail = req.user.email;
       const user = await userService.findUserByEmail(userEmail);
 
       if (!user) {
@@ -43,8 +49,7 @@ const userControllers = {
       }
 
       res.json({
-        message: `Welcome Mr. ${user.fname} ${user.lname} to Your Profile`,
-        role: user.role.name, // Include role in response
+        message: `Welcome Mr. ${user.first_name} ${user.last_name} to Your Profile as ${user.role.role_name}`,
       });
     } catch (error) {
       res.status(500).json({ error: error.message });
@@ -69,7 +74,7 @@ const userControllers = {
 
   deleteProfile: async (req, res) => {
     try {
-      const userEmail = req.userEmail;
+      const userEmail = req.user.email;
 
       const profileDeleted = await userService.deleteUserProfile(userEmail);
       if (!profileDeleted) {
