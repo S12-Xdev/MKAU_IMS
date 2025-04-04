@@ -1,4 +1,5 @@
 const { Users, Roles } = require("../models");
+const authUtils = require("../utils/authUtils");
 
 const userService = {
   findUserByEmail: async (email) => {
@@ -41,9 +42,8 @@ const userService = {
   },
 
   updateUserPassword: async (email, newPassword) => {
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
     const [updated] = await Users.update(
-      { password: hashedPassword },
+      { password: newPassword },
       { where: { email } }
     );
     if (!updated) {

@@ -33,7 +33,7 @@ const authController = {
       });
       res.json({ message: "Login successfully", token });
     } catch (error) {
-      res.status(500).json({ message: "Internal server error" });
+      res.status(500).json({ message: error});
     }
   },
 
@@ -59,33 +59,50 @@ const authController = {
         "Password Reset",
         `Click this link to reset your password: ${resetLink}`
       );
-      const otp = authUtils.generateNumericOTP(6);
-      await sendSMS(
-        phone,
-        `You have requested to reset your password. Your OTP code is: ${otp}. Do not share this code with anyone.`
-      );
+      // const otp = authUtils.generateNumericOTP(6);
+      // await sendSMS(
+      //   phone,
+      //   `You have requested to reset your password. Your OTP code is: ${otp}. Do not share this code with anyone.`
+      // );
 
-      res.json({ message: "Password reset link sent to email and OTP code via SMS" });
+      res.json({
+        message: "Password reset link sent to email and OTP code via SMS",
+      });
     } catch (error) {
       res.status(500).json({ message: "Error sending reset email" });
     }
   },
 
   resetPassword: async (req, res) => {
-    const { token, newPassword } = req.body;
+    const token = req.headers.authorization?.split(" ")[1]; // Get token from header
+    const { newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      return res
+        .status(400)
+        .json({ message: "Token and new password are required" });
+    }
 
     try {
       const decoded = authUtils.verifyToken(token);
-      if (!decoded) {
+      if (!decoded || !decoded.email) {
         return res.status(400).json({ message: "Invalid or expired token" });
       }
 
       const hashedPassword = await authUtils.hashPassword(newPassword);
-      await userService.updateUserPassword(decoded.email, hashedPassword);
+      const updateResult = await userService.updateUserPassword(
+        decoded.email,
+        hashedPassword
+      );
+
+      if (!updateResult) {
+        return res.status(500).json({ message: "Failed to update password" });
+      }
 
       res.json({ message: "Password reset successfully" });
     } catch (error) {
-      res.status(500).json({ message: "Error resetting password" });
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   },
 };

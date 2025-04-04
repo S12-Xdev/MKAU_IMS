@@ -1,7 +1,7 @@
 const { verifyToken } = require("../utils/authUtils");
 
 const authMiddleware = async (req, res, next) => {
-  const token = req.cookies.authToken; // Get token from cookies
+  const token = req.cookies.authToken; // Get token from cookies which expired after 40 seconds
 
   if (!token) {
     return res.status(401).json({ message: "Unauthenticated" });
