@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js",
-    "dev": "nodemon server.js",
+    "dev": "nodemon index.js",
     "migrate": "sequelize db:migrate",
     "migrate:undo:all": "sequelize db:migrate:undo:all",
     "migrate:undo": "sequelize db:migrate:undo",
