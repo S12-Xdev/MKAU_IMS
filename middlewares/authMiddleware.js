@@ -1,14 +1,18 @@
 const { verifyToken } = require("../utils/authUtils");
 
-const authMiddleware = async (req, res, next) => {
-  const token = req.cookies.authToken; // Get token from cookies which expired after 40 seconds
+const authMiddleware = (req, res, next) => {
+  const cookieToken = req.cookies?.authToken;
+  const headerToken = req.headers.authorization?.startsWith("Bearer ")
+    ? req.headers.authorization.split(" ")[1]
+    : undefined;
+  const token = cookieToken || headerToken;
 
   if (!token) {
     return res.status(401).json({ message: "Unauthenticated" });
   }
 
   try {
-    const decoded = await verifyToken(token); // If verifyToken is async, use await
+    const decoded = verifyToken(token);
 
     if (!decoded) {
       return res.status(403).json({ message: "Invalid token" });
@@ -24,7 +28,7 @@ const authMiddleware = async (req, res, next) => {
 // Middleware to check if the user is an admin
 const isAdmin = (req, res, next) => {
   // Check the role or permission of the user
-  if (req.user.role.role_name !== "Admin") {
+  if (!req.user || req.user.roleName !== "Admin") {
     return res.status(403).json({ message: "Access denied: Admins only" });
   }
 

@@ -1,15 +1,13 @@
-// syncDatabaseAlter.js
-
 const db = require("../models/index");
 
-// Sync with `alter: true` (modifies tables to match models without losing data)
-const syncDatabaseAlter = async () => {
+const ensureDatabaseConnection = async () => {
   try {
-    await db.sequelize.sync({ alter: true }); // Alter tables without dropping
-    console.log("Database is synchronized.");
+    await db.sequelize.authenticate();
+    console.log("Database connection has been established successfully.");
   } catch (err) {
-    console.error("Error syncing database with alter:", err);
+    console.error("Unable to connect to the database:", err);
+    throw err;
   }
 };
 
-module.exports = syncDatabaseAlter;
+module.exports = ensureDatabaseConnection;

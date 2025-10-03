@@ -3,7 +3,6 @@ const authUtils = require("../utils/authUtils");
 const { sendEmail } = require("../utils/emailUtils");
 const { sendSMS } = require("../utils/smsUtils");
 
-
 const authController = {
   login: async (req, res) => {
     const { email, password } = req.body;
@@ -22,18 +21,20 @@ const authController = {
       const token = authUtils.generateToken({
         id: user.id,
         email: user.email,
-        role: user.role,
+        roleId: user.role_id,
+        roleName: user.role?.role_name ?? null,
       });
 
       // Store token in cookies
       res.cookie("authToken", token, {
         httpOnly: true,
-        secure: false,
-        maxAge: 40 * 1000,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "strict" : "lax",
+        maxAge: 60 * 60 * 1000,
       });
       res.json({ message: "Login successfully", token });
     } catch (error) {
-      res.status(500).json({ message: error});
+      res.status(500).json({ message: error.message });
     }
   },
 
@@ -51,7 +52,7 @@ const authController = {
         return res.status(404).json({ message: "User not found" });
       }
 
-      const resetToken = authUtils.generateToken({ email }, "20m"); // Expires in 15 min
+      const resetToken = authUtils.generateToken({ email }, "20m");
       const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
 
       await sendEmail(
@@ -65,9 +66,7 @@ const authController = {
       //   `You have requested to reset your password. Your OTP code is: ${otp}. Do not share this code with anyone.`
       // );
 
-      res.json({
-        message: "Password reset link sent to email and OTP code via SMS",
-      });
+      res.json({ message: "Password reset link sent to email" });
     } catch (error) {
       res.status(500).json({ message: "Error sending reset email" });
     }

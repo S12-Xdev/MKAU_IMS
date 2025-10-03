@@ -1,5 +1,4 @@
 const { Users, Roles } = require("../models");
-const authUtils = require("../utils/authUtils");
 
 const userService = {
   findUserByEmail: async (email) => {
@@ -14,15 +13,21 @@ const userService = {
   },
 
   createUser: async (userData) => {
-    const role = await Roles.findOne({ where: { role_name: userData.role } });
+    const { roleName, ...rest } = userData;
+    const role = await Roles.findOne({ where: { role_name: roleName } });
     if (!role) throw new Error("Role not found");
 
-    const createUser = await Users.create({ ...userData, role_id: role.id });
+    const createUser = await Users.create({ ...rest, role_id: role.id });
 
     if (!createUser) {
       return null;
     }
-    return true;
+
+    return Users.findOne({
+      where: { id: createUser.id },
+      attributes: { exclude: ["password"] },
+      include: { model: Roles, as: "role" },
+    });
   },
 
   deleteUserProfile: async (email) => {
@@ -34,19 +39,38 @@ const userService = {
   },
 
   updateUserProfile: async (email, Data) => {
-    const [updated] = await Users.update(Data, { where: { email } });
-    if (!updated) {
+    const updatePayload = { ...Data };
+
+    if (Data.roleName) {
+      const role = await Roles.findOne({ where: { role_name: Data.roleName } });
+      if (!role) {
+        throw new Error("Role not found");
+      }
+      updatePayload.role_id = role.id;
+      delete updatePayload.roleName;
+    }
+
+    const [updatedCount, updatedRows] = await Users.update(updatePayload, {
+      where: { email },
+      returning: true,
+    });
+    if (!updatedCount) {
       return null;
     }
-    return true;
+    const updatedUser = updatedRows[0];
+    return Users.findOne({
+      where: { id: updatedUser.id },
+      attributes: { exclude: ["password"] },
+      include: { model: Roles, as: "role" },
+    });
   },
 
   updateUserPassword: async (email, newPassword) => {
-    const [updated] = await Users.update(
+    const [updatedCount] = await Users.update(
       { password: newPassword },
       { where: { email } }
     );
-    if (!updated) {
+    if (!updatedCount) {
       return null;
     }
     return true;
